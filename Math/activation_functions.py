@@ -20,7 +20,10 @@ def activation(activation):
 
 
 def sigmoid(x):
-    return 1/(1+math.exp(-x))
+    """sigmoid function
+    x: input, np array
+    """
+    return 1/(1+np.exp(-x))
 
 
 def softmax():
