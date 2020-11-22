@@ -6,8 +6,6 @@
 
 import os
 import numpy as np
-import torch
-import torch.nn as nn
 
 
 def softmax(x):
@@ -26,7 +24,7 @@ def entropy(p):
 
 def cross_entropy(logits, y_true):
     num_classes = logits.shape[0]
-    loss = np.sum(-y_true*np.log(logits))
+    loss = -np.sum(y_true*np.log(logits))
     loss /= num_classes
     return loss
 
