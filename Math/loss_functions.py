@@ -22,18 +22,26 @@ def entropy(p):
     return -(p*np.log(p)+(1-p)*np.log(1-p))
 
 
-def cross_entropy(logits, y_true):
-    num_classes = logits.shape[0]
-    loss = -np.sum(y_true*np.log(logits))
-    loss /= num_classes
+def cross_entropy(y_true, logits, reduction="sum"):
+
+    loss = -y_true*np.log(logits)
+
+    if reduction == "sum":
+        loss = np.sum(loss)
+
     return loss
 
 
-def binary_cross_entropy(logits, y_true):
-    num_classes = logits.shape[0]
-    loss = -np.sum(y_true*np.log(logits))
-    loss += -np.sum((1-y_true)*np.log(1-logits))
-    loss /= num_classes
+def binary_cross_entropy(y_true, logits, reduction="mean"):
+
+    loss = -y_true*np.log(logits)
+    loss += -(1-y_true)*np.log(1-logits)
+
+    if reduction == "sum":
+        loss = np.sum(loss)
+    elif reduction == "mean":
+        loss = np.mean(loss)
+
     return loss
 
 
