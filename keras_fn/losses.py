@@ -23,10 +23,11 @@ def focal_loss(logits, targets, alpha, gamma, normalizer):
 
 
 def main():
-    logits = tf.constant([0.4, 0.6]) 
+    logits = tf.constant([0.4, 0.6])
     targets = tf.constant([0, 1.])
     weighted_loss = focal_loss(logits, targets, alpha=1, gamma=2, normalizer=1)
     print(weighted_loss)
+
 
 if __name__ == "__main__":
     main()
