@@ -61,20 +61,18 @@ def np_binary_cross_entropy(y_true, y_pred, reduction="mean"):
     loss = -y_true * np.log(y_pred)
     loss += -(1-y_true) * np.log(1-y_pred)
 
-    if len(y_true.shape) == 1:  # only one sample
-        num_classes = y_true.shape[0]
-    else:  # many samples
-        num_classes = y_true.shape[1]
+    # Compute mean on the num_classes axis
+    # This is equivalent with:
+    # loss = np.sum(loss, axis=-1) / num_classes
+    # where
+    # num_classes = loss.shape[-1]
+    loss = np.mean(loss, axis=-1)
 
-    if reduction is not None:
-        assert reduction in ["sum", "mean"]
-        # devided by number of classes
-        loss /= num_classes
-
+    # Batch samples reduction
     if reduction == "sum":
-        loss = np.sum(loss)
+        loss = np.sum(loss, axis=0)
     elif reduction == "mean":
-        loss = np.mean(loss)
+        loss = np.mean(loss, axis=0)
 
     return loss
 
