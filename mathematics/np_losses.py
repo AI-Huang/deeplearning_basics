@@ -53,6 +53,7 @@ def np_cross_entropy(y_true, y_pred, reduction="sum"):
 
 
 def np_binary_cross_entropy(y_true, y_pred, reduction="mean"):
+
     y_true = np.asarray(y_true)
     y_pred = np.asarray(y_pred)
     y_pred = np_clip_by_epsilon(y_pred)
@@ -60,8 +61,15 @@ def np_binary_cross_entropy(y_true, y_pred, reduction="mean"):
     loss = -y_true * np.log(y_pred)
     loss += -(1-y_true) * np.log(1-y_pred)
 
-    # devided by number of classes
-    loss /= y_true.shape[1]
+    if len(y_true.shape) == 1:  # only one sample
+        num_classes = y_true.shape[0]
+    else:  # many samples
+        num_classes = y_true.shape[1]
+
+    if reduction is not None:
+        assert reduction in ["sum", "mean"]
+        # devided by number of classes
+        loss /= num_classes
 
     if reduction == "sum":
         loss = np.sum(loss)
