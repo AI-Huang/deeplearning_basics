@@ -1,3 +1,0 @@
-program name, num of tests, total time (s), average time (s)
-my sqrt_newton, 1000000, 1.625, 1.625e-6
-python.math sqrt, 1000000, 0.171875, 1.71875e-07
