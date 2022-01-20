@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # @Date    : Jun-02-20 00:45
-# @Author  : Your Name (you@example.org)
-# @Link    : http://example.org
+# @Author  : Kan HUANG (kan.huang@connect.ust.hk)
 
 import os
 import numpy as np
