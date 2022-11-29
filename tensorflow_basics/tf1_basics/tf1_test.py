@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # @Date    : Feb-18-20 17:12
-# @Author  : kan.huang.hkust@gmail.com
+# @Author  : Kan HUANG (kan.huang@connect.ust.hk)
 
 """TensorFlow 1.x tests
-## Requirements
+# Requirements
 - Tensorflow (tested with v1.15.0)
 - Keras (tested with v2.3.0)
 - horovod (tested with v0.22.1)
@@ -12,9 +12,11 @@
 """
 
 
+from tensorflow.contrib.framework.python.ops import add_arg_scope
 import tensorflow as tf
 import keras
 import horovod.tensorflow as hvd
+import numpy as np
 
 
 def _get_available_gpus():
@@ -41,7 +43,20 @@ def requirements_test():
     # horovod 的 version 用 pip install 查看
 
 
-def tf1_gpu_test():
+def tf1_check_device_test():
+    # @RefLink : https://stackoverflow.com/questions/44544766/how-do-i-check-if-keras-is-using-gpu-version-of-tensorflow/44547144#44547144
+
+    # Creates a graph.
+    a = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[2, 3], name='a')
+    b = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[3, 2], name='b')
+    c = tf.matmul(a, b)
+    # Creates a session with log_device_placement set to True.
+    sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+    # Runs the op.
+    print(sess.run(c))
+
+
+def tf1_list_gpu_test():
     """ 列出计算设备 """
     from tensorflow.python.client import device_lib
     from keras import backend as K
@@ -89,10 +104,78 @@ def run_sess_test():
     # sess.run(b)
 
 
+def abstract_model_xy(sess, hps, feeds, train_iterator, test_iterator, data_init, lr, f_loss):
+
+    # == Create class with static fields and methods
+    class m(object):
+        pass
+    m.sess = sess
+    m.feeds = feeds
+    m.lr = lr
+
+
+def encoder(z, objective):
+    eps = []
+    for i in range(hps.n_levels):
+        z, objective = revnet2d(str(i), z, objective, hps)
+        if i < hps.n_levels-1:
+            z, objective, _eps = split2d(
+                "pool"+str(i), z, objective=objective)
+            eps.append(_eps)
+    return z, objective, eps
+
+
+@add_arg_scope
+def my_affine_tmp(name, x, w):
+    with tf.variable_scope(name):
+        return x * w
+
+
+def default_initializer(std=0.05):
+    return tf.random_normal_initializer(0., std)
+
+
+@add_arg_scope
+def my_affine(name, input_, units):
+    # input_: a placeholder
+    with tf.variable_scope(name):
+        input_dims = input_.shape[1]
+        w = tf.get_variable("W", [input_dims, units], tf.float32,
+                            initializer=default_initializer())
+        return tf.matmul(input_, w)
+
+
+def model(sess, input_):
+    with tf.name_scope('input'):
+        Y = tf.placeholder(tf.int32, [None], name='label')
+
+
+def run_layer_test():
+    # Build graph first
+    input_ = tf.placeholder(tf.float32, [None, 3], name='input_')
+    output = my_affine("my_affine_1", input_, units=2)
+
+    # Execute with a session
+    with tf.Session() as sess:
+        # Initialize variables
+        # tf.global_variables_initializer().run() # Same effect with below
+        sess.run(tf.global_variables_initializer())
+
+        x = tf.random.uniform((32, 3))
+        output = sess.run(output, feed_dict={input_: x.eval()})
+
+        print(type(output))
+        print(output.shape)
+
+    # Check variables
+    # with tf.variable_scope(name)
+
+
 def main():
     # requirements_test()
     # tf1_gpu_test()
-    run_sess_test()
+    # run_sess_test()
+    run_layer_test()
 
 
 if __name__ == "__main__":
